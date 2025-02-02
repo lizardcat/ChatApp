@@ -1,18 +1,27 @@
-## Getting Started
+# Simple Java Chat Application
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+A simple multi-client chat application built with Java. This project demonstrates **server-client networking**, **multi-threading**, and **GUI interaction using Swing**.
 
-## Folder Structure
+## Features
+- ✅ **Multi-client support** – Multiple users can chat in real-time.
+- ✅ **Server-client architecture** – Clients connect to a central server.
+- ✅ **Swing-based GUI** – A user-friendly chat interface.
+- ✅ **Threaded communication** – Each client runs in a separate thread.
 
-The workspace contains two folders by default, where:
+## How It Works
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+1. **ChatServer.java**
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+    - Starts a server socket on port 12345.
+    - Accepts multiple clients via Threads.
+    - Broadcasts messages to all connected clients.
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+2. **ChatClient.java**
 
-## Dependency Management
+    - Connects to the server via sockets.
+    - Sends user messages to the server.
+    - Receives broadcasted messages.
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+3. **ChatClientGUI.java**
+
+    - Provides a graphical user interface for the chat client.
