@@ -3,7 +3,7 @@ import java.net.*;
 import java.util.*;
 
 public class ChatServer {
-    private static final int PORT = 12345; // Server port
+    private static final int PORT = 5000; // Server port
     private static Set<PrintWriter> clientWriters = new HashSet<>();
 
     public static void main(String[] args) {
