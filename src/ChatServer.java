@@ -3,14 +3,16 @@ import java.net.*;
 import java.util.*;
 
 public class ChatServer {
-    private static final int PORT = 5000; // Server port
+    private static final int PORT = 5000;
     private static Set<PrintWriter> clientWriters = new HashSet<>();
+    private static int clientIdCounter = 1;
+    private static Map<PrintWriter, String> clientIds = new HashMap<>();
 
     public static void main(String[] args) {
-        System.out.println("Chat server started . . .");
+        System.out.println("Chat server started...");
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
-                new ClientHandler(serverSocket.accept()).start();
+                new ClientHandler(serverSocket.accept(), clientIdCounter++).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -21,9 +23,11 @@ public class ChatServer {
         private Socket socket;
         private PrintWriter out;
         private BufferedReader in;
+        private String clientId;
 
-        public ClientHandler(Socket socket) {
+        public ClientHandler(Socket socket, int id) {
             this.socket = socket;
+            this.clientId = "User-" + id; // Assign unique ID
         }
 
         public void run() {
@@ -33,15 +37,18 @@ public class ChatServer {
 
                 synchronized (clientWriters) {
                     clientWriters.add(out);
+                    clientIds.put(out, clientId);
                 }
 
-                String message; 
+                System.out.println(clientId + " connected.");
+
+                String message;
                 while ((message = in.readLine()) != null) {
-                    System.out.println("Received: " + message);
-                    broadcast(message);
+                    System.out.println("[" + clientId + "]: " + message);
+                    broadcast("[" + clientId + "]: " + message);
                 }
             } catch (IOException e) {
-                System.out.println("Client disconnected.");
+                System.out.println(clientId + " disconnected.");
             } finally {
                 try {
                     socket.close();
@@ -50,6 +57,7 @@ public class ChatServer {
                 }
                 synchronized (clientWriters) {
                     clientWriters.remove(out);
+                    clientIds.remove(out);
                 }
             }
         }

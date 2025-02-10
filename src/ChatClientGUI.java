@@ -11,67 +11,56 @@ public class ChatClientGUI {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
+    private String username;
 
     public ChatClientGUI(String serverAddress, int serverPort) {
-        // Apply Material Design-inspired UI theme
-        UIManager.put("TextField.background", new Color(40, 40, 40));
-        UIManager.put("TextField.foreground", Color.WHITE);
-        UIManager.put("TextField.caretForeground", Color.CYAN);
-        UIManager.put("TextField.border", BorderFactory.createLineBorder(Color.GRAY));
-        UIManager.put("Button.background", new Color(30, 136, 229));
-        UIManager.put("Button.foreground", Color.WHITE);
-        UIManager.put("Button.font", new Font("SansSerif", Font.BOLD, 14));
+        // Ask for Username
+        username = JOptionPane.showInputDialog(null, "Enter your username:", "Username", JOptionPane.PLAIN_MESSAGE);
+        if (username == null || username.trim().isEmpty()) {
+            username = "User" + (int)(Math.random() * 1000); // Assign random username if left empty
+        }
 
-        // Create Main Frame
-        frame = new JFrame("🗨️ Material Chat Client");
+        // GUI Setup
+        frame = new JFrame("🗨️ Chat - " + username);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(450, 500);
         frame.setLayout(new BorderLayout());
-        frame.getContentPane().setBackground(new Color(30, 30, 30)); // Dark background
+        frame.getContentPane().setBackground(new Color(30, 30, 30));
 
-        // Chat Area
+        // Chat Display
         chatArea = new JTextArea();
         chatArea.setEditable(false);
         chatArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
         chatArea.setBackground(new Color(50, 50, 50));
         chatArea.setForeground(Color.WHITE);
-        chatArea.setMargin(new Insets(10, 10, 10, 10));
         frame.add(new JScrollPane(chatArea), BorderLayout.CENTER);
 
         // Input Panel
         JPanel inputPanel = new JPanel(new BorderLayout());
         inputPanel.setBackground(new Color(30, 30, 30));
 
-        // Message Field
         messageField = new JTextField();
         messageField.setFont(new Font("SansSerif", Font.PLAIN, 14));
         messageField.setBackground(new Color(40, 40, 40));
         messageField.setForeground(Color.WHITE);
-        messageField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(60, 60, 60), 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
-        inputPanel.add(messageField, BorderLayout.CENTER);
+        messageField.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        // Send Button
         sendButton = new JButton("Send ➤");
         sendButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         sendButton.setBackground(new Color(30, 136, 229));
         sendButton.setForeground(Color.WHITE);
         sendButton.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         sendButton.setFocusPainted(false);
-        sendButton.addActionListener(e -> sendMessage());
-        inputPanel.add(sendButton, BorderLayout.EAST);
 
+        inputPanel.add(messageField, BorderLayout.CENTER);
+        inputPanel.add(sendButton, BorderLayout.EAST);
         frame.add(inputPanel, BorderLayout.SOUTH);
 
-        // Action Listeners for Enter Key
+        // Action Listeners
         messageField.addActionListener(e -> sendMessage());
+        sendButton.addActionListener(e -> sendMessage());
 
-        // Show GUI
         frame.setVisible(true);
-
-        // Connect to server
         connectToServer(serverAddress, serverPort);
     }
 
@@ -81,7 +70,9 @@ public class ChatClientGUI {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Start a thread to listen for incoming messages
+            // Send username to server
+            out.println(username);
+
             new Thread(this::listenForMessages).start();
         } catch (IOException e) {
             chatArea.append("❌ Unable to connect to server.\n");
@@ -102,8 +93,8 @@ public class ChatClientGUI {
     private void sendMessage() {
         String message = messageField.getText().trim();
         if (!message.isEmpty()) {
-            out.println(message);
-            messageField.setText(""); // Clear input field after sending
+            out.println(username + ": " + message);
+            messageField.setText("");
         }
     }
 
